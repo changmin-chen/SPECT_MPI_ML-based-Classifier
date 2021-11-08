@@ -1,7 +1,8 @@
 import pandas as pd
+from os.path import join
 
 # readout xls data
-fname = '..\\GroundTruth.xls'
+fname = join('..', 'GroundTruth.xls')
 data = pd.read_excel(fname)
 data = data.iloc[0:192]
 data = data[['# Patients','Evaluation','Age','Sex','Set Distribution']]
@@ -21,6 +22,6 @@ print(testSet.head())
 print(validationSet.head())
 
 # write .csv file
-trainSet.to_csv('..\\trainSet.csv', header=False, index=False)
-testSet.to_csv('..\\testSet.csv', header=False, index=False)
-validationSet.to_csv('..\\validationSet.csv', header=False, index=False)
+trainSet.to_csv(join('..', 'trainSet.csv'), header=False, index=False)
+testSet.to_csv(join('..', 'testSet.csv'), header=False, index=False)
+validationSet.to_csv(join('..', 'validationSet.csv'), header=False, index=False)
