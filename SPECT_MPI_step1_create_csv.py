@@ -9,7 +9,7 @@ data = data[['# Patients','Evaluation','Age','Sex','Set Distribution']]
 
 # extract colums, assign processed data
 data['# Patients'] = data['# Patients'].apply(str) + '.jpg' # filename = paitentID.jpg
-data['Evaluation'] = data['Evaluation'].transform(lambda x: 0 if x == 'Normal' else 1) # x150 Abnormal, x42 Normal
+data['Evaluation'] = data['Evaluation'].transform(lambda x: 0 if x == 'Normal' else 1) # totally 42 Normal & 150 Abnormal
 
 # sorting data depend on the set type
 trainSet = data.loc[data['Set Distribution'] == 'Train']
