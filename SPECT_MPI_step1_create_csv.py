@@ -12,16 +12,14 @@ data['# Patients'] = data['# Patients'].apply(str) + '.jpg' # filename = paitent
 data['Evaluation'] = data['Evaluation'].transform(lambda x: 0 if x == 'Normal' else 1) # totally 42 Normal & 150 Abnormal
 
 # sorting data depend on the set type
+data['Set Distribution'] = data['Set Distribution'].replace('Validation', 'Train')
 trainSet = data.loc[data['Set Distribution'] == 'Train']
 testSet = data.loc[data['Set Distribution'] == 'Test']
-validationSet = data.loc[data['Set Distribution'] == 'Validation']
 
 # check processed data
 print(trainSet.head())
 print(testSet.head())
-print(validationSet.head())
 
 # write .csv file
-trainSet.to_csv(join('..', 'trainSet.csv'), header=False, index=False)
-testSet.to_csv(join('..', 'testSet.csv'), header=False, index=False)
-validationSet.to_csv(join('..', 'validationSet.csv'), header=False, index=False)
+trainSet.to_csv(join('..', 'trainSet.csv'), header=False, index=False) # 160 observations
+testSet.to_csv(join('..', 'testSet.csv'), header=False, index=False) # 32 observations
