@@ -1,12 +1,10 @@
 clear, clc
 close all
 
-src = 'D:\SPECT_MPI\2002.jpg'; % abnormal
-img_size = [897, 976];
+src = '../1001.jpg'; % abnormal
 block_sz = [90, 90];
 
 img = imread(src);
-img = rgb2gray(img);
 
 figure,
 image(img)
@@ -70,20 +68,20 @@ c1(:,:,41:60) = SA_stress;
 c1(:,:,61:70) = HLA_stress;
 c1(:,:,71:80) = VLA_stress;
 
-figure,
-imagesc(c1(:,:,48))
-colormap(gray(256))
+% figure,
+% imagesc(c1(:,:,48))
+% colormap(gray(256))
 
 %% Remove white bar at row 1 & col 1
 c2 = c1(2:end,2:end,:);
 
-figure,
-imagesc(c2(:,:,48))
-colormap(gray(256))
+% figure,
+% imagesc(c2(:,:,48))
+% colormap(gray(256))
 
 %% Remove number, method : apply nearest pixel value
 p = [14, 17]; % processing area
-w_threshold = 200;
+w_threshold = 150;
 
 tmp = c2(1:p(1), 1:p(2), :);
 tmp = reshape(tmp, [], 1);
@@ -97,9 +95,9 @@ tmp = reshape(tmp, p(1), p(2), []);
 c3 = c2;
 c3(1:p(1), 1:p(2), :) = tmp;
 
-figure,
-imagesc(c3(:,:,48))
-colormap(gray(256))
+% figure,
+% imagesc(c3(:,:,48))
+% colormap(gray(256))
 
 %% Clinical Prior: (Rest - Stress) for SA, HLA, VLA
 SA_diff = c3(:,:,1:20) - c3(:,:,41:60);
@@ -114,5 +112,21 @@ c5(:,:,1) = max(c4(:,:,1:20),[],3); % SA MIP
 c5(:,:,2) = max(c4(:,:,21:30),[],3); % HLA MIP
 c5(:,:,3) = max(c4(:,:,31:40),[],3); % VLA MIP
 
-figure, image(c5(:,:,1))
+figure, image(c5(:,:,2))
+colormap(gray(256))
+
+%% Clinical Prior: (Rest + Stress) for SA, HLA, VLA
+SA_diff = c3(:,:,1:20) + c3(:,:,41:60);
+HLA_diff = c3(:,:,21:30) + c3(:,:,61:70);
+VLA_diff = c3(:,:,31:40) + c3(:,:,71:80);
+c6 = cat(3, SA_diff, HLA_diff, VLA_diff);
+
+%% Maximum intensity projection (mIP)
+% c5: ch1=SA MIP, ch2=HLA MIP, ch3=VLA MIP
+c7 = zeros(size(c4,1), size(c4,2), 3);
+c7(:,:,1) = min(c6(:,:,5:12),[],3); % SA MIP, 3:13
+c7(:,:,2) = min(c6(:,:,21:30),[],3); % HLA MIP
+c7(:,:,3) = min(c6(:,:,31:40),[],3); % VLA MIP
+
+figure, image(c7(:,:,2))
 colormap(gray(256))

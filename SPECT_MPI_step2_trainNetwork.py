@@ -139,7 +139,7 @@ def train(model, args, train_loader, test_loader, loss_function, optimizer):
 # Start to train Network
 if __name__ == '__main__':
     # Hyper-parameters
-    args = {'num_epochs': 2,
+    args = {'num_epochs': 3,
             'batch_size': 16,
             'learning_rate': 0.001}
 
@@ -150,10 +150,10 @@ if __name__ == '__main__':
             T.Resize([224,224]),
             T.ConvertImageDtype(torch.float),
         )
-    train_csvdir = join('..', 'trainSet.csv')
-    train_imgdir = join('..', 'TrainSet')
-    test_csvdir = join('..', 'testSet.csv')
-    test_imgdir = join('..', 'TestSet')
+    train_csvdir = join('..','trainSet.csv')
+    train_imgdir = join('..','proc_data','TrainSet')
+    test_csvdir = join('..','testSet.csv')
+    test_imgdir = join('..','proc_data','TestSet')
     train_dataset = CustomImageDataset(train_csvdir, train_imgdir, transform=img_transform)
     test_dataset = CustomImageDataset(test_csvdir, test_imgdir, transform=img_transform)
 
