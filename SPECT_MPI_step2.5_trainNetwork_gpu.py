@@ -13,6 +13,7 @@ from torchvision.io import read_image
 import time
 from optparse import OptionParser
 
+
 def args_train():
     # Training Parameters
     parser = OptionParser()
@@ -22,6 +23,7 @@ def args_train():
     parser.add_option('--port', type=str, default='dummy')
     (options, args) = parser.parse_args()
     return options
+
 
 def print_num_of_parameters(net):
     model_parameters = filter(lambda p: p.requires_grad, net.parameters())
@@ -88,7 +90,7 @@ def train(model, args, train_loader, test_loader, loss_function, optimizer):
     if torch.cuda.is_available():
         with torch.cuda.device(0):
             # throw model weights to GPU
-            model = model.cuda()    
+            model = model.cuda()
 
             # Train the model
             total_step = len(train_loader)
@@ -96,7 +98,7 @@ def train(model, args, train_loader, test_loader, loss_function, optimizer):
                 # TRAINING
                 tini = time.time()
                 train_loss = []
-               
+
                 for i, (images, labels) in enumerate(train_loader):
                     # throw data to the GPU
                     images, labels = images.cuda(), labels.cuda()
@@ -130,14 +132,14 @@ def train(model, args, train_loader, test_loader, loss_function, optimizer):
 
                 # PRINT THE RESULTS
                 print('Epoch {}, Time {:.2f}, Train Loss: {:.4f}, Test Loss: {:.4f}, Test Accuracy: {:.4f}'
-                    .format(epoch + 1, time.time() - tini,
-                            sum(train_loss) / len(train_loss), sum(test_loss) / len(test_loss), acccuracy_test))
+                      .format(epoch + 1, time.time() - tini,
+                              sum(train_loss) / len(train_loss), sum(test_loss) / len(test_loss), acccuracy_test))
 
 
 # Start to train Network
 if __name__ == '__main__':
     # Hyper-parameters
-    args = {'num_epochs': 10,
+    args = {'num_epochs': 50,
             'batch_size': 16,
             'learning_rate': 0.001}
 
@@ -145,13 +147,13 @@ if __name__ == '__main__':
 
     # MNIST dataset (images and labels)
     img_transform = nn.Sequential(
-            T.Resize([224,224]),
-            T.ConvertImageDtype(torch.float),
-        )
+        T.Resize([224, 224]),
+        T.ConvertImageDtype(torch.float),
+    )
     train_csvdir = join('..', 'trainSet.csv')
-    train_imgdir = join('..', 'TrainSet')
+    train_imgdir = join('..', 'proc_data', 'TrainSet')
     test_csvdir = join('..', 'testSet.csv')
-    test_imgdir = join('..', 'TestSet')
+    test_imgdir = join('..', 'proc_data', 'TestSet')
     train_dataset = CustomImageDataset(train_csvdir, train_imgdir, transform=img_transform)
     test_dataset = CustomImageDataset(test_csvdir, test_imgdir, transform=img_transform)
 
@@ -161,15 +163,17 @@ if __name__ == '__main__':
 
     # Logistic regression model
     import torch.nn as nn
+
     model = CNN_vgg16(pretrained=True)
 
     # Loss and optimizer
-    loss_function = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=args['learning_rate'])
+    # weights for [normal, abnormal]
+    loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.7, 0.3]).cuda())
+    optimizer = torch.optim.Adam(model.parameters(), lr=args['learning_rate'])
     print_num_of_parameters(model)
     train(model, args, train_loader, test_loader, loss_function, optimizer)
 
     # Test the model
     # In test phase, we don't need to compute gradients (for memory efficiency)
 
-    torch.save(model, join('..',args['model']+'.pth'))
+    torch.save(model, join('..', args['model'] + '.pth'))

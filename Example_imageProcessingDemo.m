@@ -94,7 +94,9 @@ c3(1:p(1), 1:p(2), :, :) = tmp;
 % imagesc(uint8(c3(:,:,:,48)))
 
 %% RGB2gray
-% rgb2gray
+% why rgb2gray, the lightness is the only info that is interpretible from SPECT
+% MPI images, and the R, G, B pixel values distribution in each channel are not
+% important.
 c3 = uint8(c3);
 c4 = zeros(size(c3,1), size(c3,2), size(c3,4));
 for i = 1: size(c4,3)
@@ -104,22 +106,45 @@ end
 % figure, image(c4(:,:,10)), colormap(gray(256))
 % figure, image(c4(:,:,50)), colormap(gray(256))
 
-%% Substraction (Rest - Stress)
-c5 = zeros(size(c4,1), size(c4,2), 40);
-c5(:,:,1:20) = c4(:,:,1:20) - c4(:,:,41:60);
-c5(:,:,21:30) = c4(:,:,21:30) - c4(:,:,61:70);
-c5(:,:,31:40) = c4(:,:,31:40) - c4(:,:,71:80);
+%% Reshaping
+selected_SA  = 4:13;
+SA_ch = c4(:,:, [selected_SA, selected_SA+40]); % rest x 10, stress x 10
+HLA_ch = c4(:,:, [21:30, 61:70]);
+VLA_ch = c4(:,:, [31:40, 71:80]);
 
-slope = 1;
-intercept = 500;
-c5 = c5*slope + intercept;
-c5 = uint16(c5);
+SA_ch_cat = zeros(89*5, 89*4);
+count = 1;
+for j = 1: 4 
+    for i = 1:5
+        SA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = SA_ch(:,:,count);
+        count = count+1;
+    end
+end
 
-%% Check
-% f1 = figure('Position',[616,754,560,420]);
-% a1 = axes('Parent', f1);
-% for i = 1:40
-%     imagesc(c5(:,:,i), 'Parent', a1)
-%     colormap(a1, gray(256))
-%     pause
-% end
+HLA_ch_cat = zeros(89*5, 89*4);
+count = 1;
+for  j = 1: 4 
+    for i = 1:5
+        HLA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = HLA_ch(:,:,count);
+        count = count+1;
+    end
+end
+
+VLA_ch_cat = zeros(89*5, 89*4);
+count = 1;
+for j = 1: 4
+    for i = 1:5
+        VLA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = VLA_ch(:,:,count);
+        count = count+1;
+    end
+end
+
+
+figure, image(SA_ch_cat), colormap(gray(256))
+figure, image(HLA_ch_cat), colormap(gray(256))
+figure, image(VLA_ch_cat), colormap(gray(256))
+
+% Output feature maps
+feature_maps = cat(3, SA_ch_cat, HLA_ch_cat, VLA_ch_cat);
+feature_maps = uint8(feature_maps);
+% imwrite(feature_maps, 'test.png');
