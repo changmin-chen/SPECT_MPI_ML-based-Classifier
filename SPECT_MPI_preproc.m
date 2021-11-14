@@ -1,4 +1,4 @@
-function feature_maps = SPECT_MPI_preproc(img)
+function c4 = SPECT_MPI_preproc(img)
 block_sz = [90, 90];
 
 SA_lu = [51, 70];
@@ -85,39 +85,4 @@ for i = 1: size(c4,3)
     c4(:,:,i) = rgb2gray(c3(:,:,:,i));
 end
 
-%% Reshaping
-selected_SA  = 4:13;
-SA_ch = c4(:,:, [selected_SA, selected_SA+40]); % rest x 10, stress x 10
-HLA_ch = c4(:,:, [21:30, 61:70]);
-VLA_ch = c4(:,:, [31:40, 71:80]);
-
-SA_ch_cat = zeros(89*5, 89*4);
-count = 1;
-for j = 1: 4 
-    for i = 1:5
-        SA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = SA_ch(:,:,count);
-        count = count+1;
-    end
-end
-
-HLA_ch_cat = zeros(89*5, 89*4);
-count = 1;
-for  j = 1: 4 
-    for i = 1:5
-        HLA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = HLA_ch(:,:,count);
-        count = count+1;
-    end
-end
-
-VLA_ch_cat = zeros(89*5, 89*4);
-count = 1;
-for j = 1: 4
-    for i = 1:5
-        VLA_ch_cat((i-1)*89+1: i*89, (j-1)*89+1: j*89) = VLA_ch(:,:,count);
-        count = count+1;
-    end
-end
-
-%% Output feature maps
-feature_maps = cat(3, SA_ch_cat, HLA_ch_cat, VLA_ch_cat);
-feature_maps = uint8(feature_maps);
+c4 = uint8(c4);

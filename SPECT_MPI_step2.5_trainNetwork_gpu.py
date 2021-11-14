@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import nibabel as nib
 from torchvision import transforms
 import torchvision.transforms as T
 from torch.utils.data import Dataset
@@ -47,8 +48,8 @@ def classification_accuracy(test_loader, model):
 
 
 # Creating a Custom Dataset for your files
-class CustomImageDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform, target_transform=None):
+class CustomImageDataset(Dataset): # todo Readfunction
+    def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
         self.img_labels = pd.read_csv(annotations_file)
         self.img_dir = img_dir
         self.transform = transform
@@ -58,9 +59,10 @@ class CustomImageDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        img_path = join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = read_image(img_path)
-        label = self.img_labels.iloc[idx, 1]
+        img_path = join(self.img_dir, self.img_labels.iloc[idx, 0]) # 1st column in .csv = filename
+        image = nib.load(img_path).get_fdata()
+        image = torch.tensor(image).permute([2,0,1])
+        label = self.img_labels.iloc[idx, 1] # 2nd column in .csv = label (Normal=0, Abnormal=1)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -68,14 +70,17 @@ class CustomImageDataset(Dataset):
         return image, label
 
 
-class CNN_vgg16(nn.Module):
+
+class CNN_vgg16(nn.Module): # todo Network structure
     def __init__(self, pretrained):
         super(CNN_vgg16, self).__init__()
         self.features = torchvision.models.vgg16(pretrained=pretrained).features
+        self.features[0] = nn.Conv2d(2, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)) # replace
         self.classifier = torchvision.models.vgg16(pretrained=pretrained).classifier
-        self.classifier[-1] = nn.Linear(4096, 2, bias=True)
+        self.classifier[-2] = nn.Linear(4096, 512, bias=True) # replace
+        self.classifier[-1] = nn.Linear(512, 2, bias=True) # replace
 
-        for par in list(self.features.parameters()):
+        for par in list(self.features[1:].parameters()):
             par.requires_grad = False
 
     def forward(self, x):
@@ -139,7 +144,7 @@ def train(model, args, train_loader, test_loader, loss_function, optimizer):
 # Start to train Network
 if __name__ == '__main__':
     # Hyper-parameters
-    args = {'num_epochs': 50,
+    args = {'num_epochs': 40,
             'batch_size': 16,
             'learning_rate': 0.001}
 

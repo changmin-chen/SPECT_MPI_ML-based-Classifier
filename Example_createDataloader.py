@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor
+import nibabel as nib
 from torchvision.io import read_image
 import matplotlib.pyplot as plt
 
@@ -24,7 +25,8 @@ class CustomImageDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = join(self.img_dir, self.img_labels.iloc[idx, 0]) # 1st column in .csv = filename
-        image = read_image(img_path)
+        image = nib.load(img_path).get_fdata()
+        image = torch.tensor(image).permute([2,0,1])
         label = self.img_labels.iloc[idx, 1] # 2nd column in .csv = label (Normal=0, Abnormal=1)
         if self.transform:
             image = self.transform(image)
@@ -34,12 +36,12 @@ class CustomImageDataset(Dataset):
 
 
 train_csvdir = join('..', 'trainSet.csv')
-train_imgdir = join('..', 'TrainSet')
+train_imgdir = join('..', 'proc_data', 'TrainSet')
 img_transform = nn.Sequential(
             T.Resize([224,224]),
             T.ConvertImageDtype(torch.float)
         )
-training_data = CustomImageDataset(train_csvdir,train_imgdir, transform=img_transform)
+training_data = CustomImageDataset(train_csvdir, train_imgdir, transform=img_transform)
 
 # Preparing your data for training with DataLoaders
 train_dataloader = DataLoader(training_data, batch_size=8, shuffle=True)
@@ -51,6 +53,5 @@ label = train_labels[0]
 print(f"Feature batch shape: {train_features.size()}")
 print(f"Labels batch shape: {train_labels.size()}")
 print(f"Label: {label}")
-print(img.dtype)
-plt.imshow(img.permute((1,2,0)), cmap="gray")
+plt.imshow(img[2,:,:], cmap="gray")
 plt.show()

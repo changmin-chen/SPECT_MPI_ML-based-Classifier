@@ -13,7 +13,9 @@ info = dir(fullfile(src,'*.jpg'));
 for i = 1: length(info)
     img = imread(fullfile(info(i).folder, info(i).name));
     img = SPECT_MPI_preproc(img);
-    imwrite(img, fullfile(targ, info(i).name));
+    img = SPECT_MPI_postproc(img);
+%     imwrite(img, fullfile(targ, info(i).name)); % save as jpg if RGB form
+    niftiwrite(img, fullfile(targ, info(i).name)); % save as nifti if others
 end
 
 
@@ -28,6 +30,8 @@ info = dir(fullfile(src,'*.jpg'));
 for i = 1: length(info)
     img = imread(fullfile(info(i).folder, info(i).name));
     img = SPECT_MPI_preproc(img);
-    imwrite(img, fullfile(targ, info(i).name));
+    img = SPECT_MPI_postproc(img);
+    %     imwrite(img, fullfile(targ, info(i).name));
+    niftiwrite(img, fullfile(targ, info(i).name));
 end
 
