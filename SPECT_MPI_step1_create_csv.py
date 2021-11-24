@@ -8,7 +8,7 @@ data = data.iloc[0:192]
 data = data[['# Patients','Evaluation','Age','Sex','Set Distribution']]
 
 # extract colums, assign processed data
-data['# Patients'] = data['# Patients'].apply(str) + '.jpg' # filename = paitentID.jpg
+data['# Patients'] = data['# Patients'].apply(str) + '.nii' # filename = paitentID.nii
 data['Evaluation'] = data['Evaluation'].transform(lambda x: 0 if x == 'Normal' else 1) # totally 42 Normal & 150 Abnormal
 
 # sorting data depend on the set type
@@ -21,5 +21,5 @@ print(trainSet.head())
 print(testSet.head())
 
 # write .csv file
-trainSet.to_csv(join('..', 'trainSet.csv'), header=False, index=False) # 160 observations
-testSet.to_csv(join('..', 'testSet.csv'), header=False, index=False) # 32 observations
+trainSet.to_csv(join('..', 'trainSet.csv'), header=True, index=False) # 160 observations
+testSet.to_csv(join('..', 'testSet.csv'), header=True, index=False) # 32 observations

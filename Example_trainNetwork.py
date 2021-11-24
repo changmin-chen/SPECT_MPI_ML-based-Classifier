@@ -61,7 +61,7 @@ class CustomImageDataset(Dataset): # todo Readfunction
     def __getitem__(self, idx):
         img_path = join(self.img_dir, self.img_labels.iloc[idx, 0]) # 1st column in .csv = filename
         image = nib.load(img_path).get_fdata()
-        image = torch.tensor(image).permute([2,0,1])
+        image = torch.tensor(image).permute([3,0,1,2]) # torch.Size([2,89,89,40])
         label = self.img_labels.iloc[idx, 1] # 2nd column in .csv = label (Normal=0, Abnormal=1)
         if self.transform:
             image = self.transform(image)
