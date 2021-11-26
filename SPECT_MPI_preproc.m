@@ -85,4 +85,4 @@ for i = 1: size(c4,3)
     c4(:,:,i) = rgb2gray(c3(:,:,:,i));
 end
 
-c4 = uint8(c4);
+c4 = uint8(c4); % size(c4) = [89,89,80], 1:40 for rest; 41:80 for stress
