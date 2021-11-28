@@ -13,7 +13,7 @@ img = cc_img(imread(src)); % ccimg size = 712x890x3
 %% original image
 show(img, 'original image')
 
-%% step 2: calculating the centroid of LVC
+%% step 1: calculating the centroid of LVC
 % mask evaluation is based on threshold red 165
 lvc_threshold = 165;
 lvc = img(:,:,1) > lvc_threshold;
@@ -67,7 +67,7 @@ masked_img(repmat(masked_img(:,:,1)<20, [1,1,3])) = 0; % red color thresholding
 masked_img(~repmat(mask,[1,1,3])) = 0;
 show(masked_img, 'masked, color-thresholded image');
 
-%% step 3: 3D-registration
+%% step 2: 3D-registration
 % 3D registration perfrom on masked image
 perf_img = to3d(rgb2gray(masked_img));
 data = regist_3d(perf_img);

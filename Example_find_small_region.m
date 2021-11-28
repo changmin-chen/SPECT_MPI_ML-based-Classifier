@@ -4,10 +4,10 @@ close all
 addpath('./helperFunctions');
 
 % src = '../2038.jpg'; % abnormal, w/ inf. wall excessive signal
-% src = '../2048.jpg'; % abnormal, w/o ...
+src = '../2048.jpg'; % abnormal, w/o ...
 % src = '../1002.jpg'; % normal, w/ mild excessive
 % src = '../2120.jpg';
-src = '../4008.jpg';
+% src = '../4008.jpg';
 
 img = cc_img(imread(src)); % ccimg size = 712x890x3
 
@@ -17,7 +17,7 @@ img = cc_img(imread(src)); % ccimg size = 712x890x3
 %% red channel threshod
 idx = img(:,:,1) <= 100;
 img(repmat(idx,[1,1,3])) = 0;
-show(img, 'red threshod 100')
+show(img, 'original image, red threshod 100')
 
 %% Laplacian
 kernal = [-1 -1 -1; -1 8 -1; -1 -1 -1];
@@ -53,14 +53,39 @@ for p = 1:80
 end
 
 
-%% close 
+%% processing the close region
 I_close = logical(toccimg(I));
-show(I_close, 'to be close ori')
-se = strel('square', 4); 
-% se = se.Neighborhood;
-% se(1:2, :) = false;
+show(I_close, 'to be close, original')
+
+% step 1: dilation
+se = strel('diamond', 1); 
 I_close = imdilate(I_close, se);
 
-show(I_close, 'to be close proc')
+% step 2: neightbor mix
+mixed_map = false(size(I_close));
+for r = 1:8
+    for c = 1:10
+        valid = c-1>=1 && c+1<=10;
+        if valid
+            center =  I_close((r-1)*89+1:r*89, (c-1)*89+1:c*89);
+            lt_nei = I_close((r-1)*89+1:r*89, (c-2)*89+1:(c-1)*89);
+            rt_nei = I_close((r-1)*89+1:r*89, c*89+1:(c+1)*89);
+            mixed = (lt_nei | center) | rt_nei;
+            mixed_map((r-1)*89+1:r*89, (c-1)*89+1:c*89) = mixed;
+        end
+    end
+end
+I_close = mixed_map;
+
+% step 3: stress-rest mix
+for r = 1: 2: 8
+    st = I_close((r-1)*89+1: r*89, :);
+    rt = I_close(r*89+1: (r+1)*89, :);
+    mixed = st | rt;
+    I_close((r-1)*89+1: (r+1)*89, :) = repmat(mixed, [2,1]);
+end
+
+
+show(I_close, 'to be close, processed')
 img(repmat(I_close, [1,1,3])) = 0;
 show(img, 'closed img')

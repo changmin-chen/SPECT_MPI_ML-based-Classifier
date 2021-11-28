@@ -1,5 +1,5 @@
 function data = SPECT_MPI_imgProcFunc_ver1(img)
-% SPECT_MPI_imgProcFunc_type1
+% SPECT_MPI_imgProcFunc_ver 1
 % centroids: calculation is based on red channel
 % mask: calculation is based on red-thresholded image
 % registration: 3-dimensional, using masked-red thresholded image
