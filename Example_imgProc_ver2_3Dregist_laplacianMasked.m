@@ -1,10 +1,21 @@
-function data = SPECT_MPI_imgProcFunc_ver2(img)
-% SPECT_MPI_imgProcFunc_ver 2
-
+%% init
+clear, clc
+close all
 addpath('./helperFunctions');
-img = cc_img(img); % ccimg size = 712x890x3
 
-%% step 1: 3D-registration
+% src = '../2038.jpg'; % abnormal, w/ inf. wall excessive signal
+% src = '../2048.jpg'; % abnormal, w/o ...
+% src = '../1002.jpg'; % normal, w/o
+% src = '../1003.jpg'; % normal, w/o
+% src = '../1004.jpg'; % normal, w/o
+src = '../2120.jpg'; % abnormal, w/
+
+img = cc_img(imread(src)); % ccimg size = 712x890x3
+
+%% original image
+show(img, 'original image')
+
+%% step 2: 3D-registration
 % estimation
 [~, tforms] = regist_3d(to3d(rgb2gray(img)));
 
@@ -26,22 +37,26 @@ for ch = 1:3 % R, G and B
     img(:,:, ch) = toccimg(img_ch_registed);
 end
 
+% show registration performance
+show(img, 'registrated image')
 
 %% step 2: Get small region mask
 mask = get_La_mask(img);
+show(mask, 'mask, original')
+
+% mask processing
+mask_proc = mask;
 
 % close
 se = strel('diamond', 4); 
-mask = imdilate(~mask, se);
-mask = ~mask;
+mask_proc = imdilate(~mask_proc, se);
+mask_proc = ~mask_proc;
+show(mask_proc, 'mask closed')
 
 % mirror
-mask = mask_mirroring(mask);
-img(~repmat(mask, [1,1,3])) = 0;
+mask_proc = mask_mirroring(mask_proc);
+show(mask_proc, 'mask closed and mirrored')
 
-%% output
-img = to3d(rgb2gray(img));
-data = uint8(cat(4, img(:,:,1:40), img(:,:,41:80))); % ch. 1: stress, ch. 2: rest
-
-end
+img(~repmat(mask_proc, [1,1,3])) = 0;
+show(img, 'masked image')
 

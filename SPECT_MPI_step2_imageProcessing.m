@@ -13,11 +13,13 @@ for i = 1: length(info)
     img = imread(fullfile(info(i).folder, info(i).name));
     
     % please select image procesing function here, and comment the others
+%     data = SPECT_MPI_imgProcFunc_ver0(img);
 %     data = SPECT_MPI_imgProcFunc_ver1(img);
     data = SPECT_MPI_imgProcFunc_ver2(img);
     
     % save as nifti
     niftiwrite(data, fullfile(targ, info(i).name));
+    disp(['Image processing for volume No.' num2str(i) ' completed.'])
 end
 
 %% For TestSet
@@ -32,9 +34,11 @@ for i = 1: length(info)
     img = imread(fullfile(info(i).folder, info(i).name));
     
     % please select image procesing function here, and comment the others
+%     data = SPECT_MPI_imgProcFunc_ver0(img);
 %     data = SPECT_MPI_imgProcFunc_ver1(img);
     data = SPECT_MPI_imgProcFunc_ver2(img);
     
      % save as nifti
     niftiwrite(data, fullfile(targ, info(i).name));
+    disp(['Image processing for volume No.' num2str(i) ' completed.'])
 end

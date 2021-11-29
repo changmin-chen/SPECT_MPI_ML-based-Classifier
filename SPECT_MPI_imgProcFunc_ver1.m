@@ -2,12 +2,36 @@ function data = SPECT_MPI_imgProcFunc_ver1(img)
 % SPECT_MPI_imgProcFunc_ver 1
 % centroids: calculation is based on red channel
 % mask: calculation is based on red-thresholded image
-% registration: 3-dimensional, using masked-red thresholded image
+% registration: 3-dimensional
+% regist. estimation: masked-red-thresholded image
+% regist. application: masked image
 
 addpath('./helperFunctions');
 img = cc_img(img); % ccimg size = 712x890x3
 
-%% step 1: calculating the centroid of LVC
+%% step 1: 3D-registration
+% estimation
+[~, tforms] = regist_3d(to3d(rgb2gray(img)));
+
+% application (channel by channel)
+for ch = 1:3 % R, G and B
+    
+    % extract image channel by channel
+    img_ch = to3d(img(:,:,ch));
+    stress = img_ch(:,:,1:40);
+    rest = img_ch(:,:,41:80);
+    
+    % rest volume is registered to stress volume
+    rest(:,:,1:20) = imwarp(rest(:,:,1:20), tforms{1}, 'OutputView', imref3d([89, 89, 20]));
+    rest(:,:,21:30) = imwarp(rest(:,:,21:30), tforms{2}, 'OutputView', imref3d([89, 89, 10]));
+    rest(:,:,31:40) = imwarp(rest(:,:,31:40), tforms{3}, 'OutputView', imref3d([89, 89, 10]));
+    
+    % write the registered image to that channel
+    img_ch_registed = cat(3, stress, rest);
+    img(:,:, ch) = toccimg(img_ch_registed);
+end
+
+%% step 2: calculating the centroid of LVC and the mask of the heart wall
 % finding the centroid of LVC, evaluation is based on red channel
 wall = to3d(img(:,:,1)); % red channel
 stress_wall = wall(:,:,1:40); % get stress centroids
@@ -27,14 +51,13 @@ rest_centroids = [...
 lvc_threshold = 165;
 lvc = img(:,:,1) > lvc_threshold;
 mask = get_mask(lvc, stress_centroids, rest_centroids);
-% masking the image, with a mild red color thresholding
-masked_img = img;
-masked_img(repmat(masked_img(:,:,1)<=20, [1,1,3])) = 0; % very-mild red color thresholding
-masked_img(~repmat(mask,[1,1,3])) = 0;
+mask = mask_mirroring(mask);
 
-%% step 2: 3D-registration
-% 3D registration perfrom on masked image
-tmp = regist_3d(to3d(rgb2gray(masked_img)));
-data = cat(4, tmp(:,:,1:40), tmp(:,:,41:80)); % ch. 1: stress, ch. 2: rest
+% masking the image
+img(~repmat(mask,[1,1,3])) = 0;
+
+%% output
+img = to3d(rgb2gray(img));
+data = uint8(cat(4, img(:,:,1:40), img(:,:,41:80))); % ch. 1: stress, ch. 2: rest
 
 end

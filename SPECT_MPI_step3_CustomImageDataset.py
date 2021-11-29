@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     # Show up output tensor.Size
     for i, (images, labels) in enumerate(train_loader):
-        print(images.size())
+        print(labels.dtype)
 
 
 # Using "CustomImageDataset" in SPECT_MPI_step3_dataLoader:
