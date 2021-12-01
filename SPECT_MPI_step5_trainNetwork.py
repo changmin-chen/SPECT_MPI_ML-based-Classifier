@@ -1,6 +1,6 @@
 from os.path import join
 from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
-from SPECT_MPI_step4_CustomNetwork import CustomNetwork
+from SPECT_MPI_step4_fake3DNet import Fake3DNet
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import torch
@@ -20,6 +20,6 @@ if __name__ == '__main__':
     test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
 
     # Network
-    model = CustomNetwork()
+    model = Fake3DNet()
 
    

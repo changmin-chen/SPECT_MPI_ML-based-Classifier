@@ -26,7 +26,7 @@ L = conv2(L, kernal, 'same');
 img_L = L+double(rgb2gray(img));
 Le = L>70;
 % show(L, 'Laplacian')
-% show(Le, 'edge') % edge
+show(Le, 'edge') % edge
 
 %% region growing
 I = ~to3d(Le);
@@ -59,33 +59,11 @@ show(I_close, 'to be close, original')
 
 % step 1: dilation
 se = strel('diamond', 1); 
-I_close = imdilate(I_close, se);
-
-% step 2: neightbor mix
-mixed_map = false(size(I_close));
-for r = 1:8
-    for c = 1:10
-        valid = c-1>=1 && c+1<=10;
-        if valid
-            center =  I_close((r-1)*89+1:r*89, (c-1)*89+1:c*89);
-            lt_nei = I_close((r-1)*89+1:r*89, (c-2)*89+1:(c-1)*89);
-            rt_nei = I_close((r-1)*89+1:r*89, c*89+1:(c+1)*89);
-            mixed = (lt_nei | center) | rt_nei;
-            mixed_map((r-1)*89+1:r*89, (c-1)*89+1:c*89) = mixed;
-        end
-    end
-end
-I_close = mixed_map;
-
-% step 3: stress-rest mix
-for r = 1: 2: 8
-    st = I_close((r-1)*89+1: r*89, :);
-    rt = I_close(r*89+1: (r+1)*89, :);
-    mixed = st | rt;
-    I_close((r-1)*89+1: (r+1)*89, :) = repmat(mixed, [2,1]);
-end
+I_close = mask_mirroring(imdilate(~I_close, se));
+I_close = ~I_close;
 
 
 show(I_close, 'to be close, processed')
-img(repmat(I_close, [1,1,3])) = 0;
-show(img, 'closed img')
+disp_img = img;
+disp_img(repmat(I_close, [1,1,3])) = 0;
+show(disp_img, 'closed img')
