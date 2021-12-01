@@ -7,9 +7,8 @@ model = torchvision.models.vgg16(pretrained=True).features
 layer = model[0]
 
 # Assign Model Parameters
-wb = list(layer.parameters())
-weights = wb[0]
-bias = wb[1]
+weights = layer.weight
+bias = layer.bias
 print(f'Convolution layer parameters shape: {weights.shape}')
 
 # appending the dimension

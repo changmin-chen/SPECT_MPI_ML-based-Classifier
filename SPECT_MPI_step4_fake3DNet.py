@@ -18,7 +18,11 @@ class Fake3DNet(nn.Module):
         for i, layer in enumerate(self.features.children()):
             if isinstance(layer, nn.Conv2d):
                 in_ch, out_ch = layer.in_channels, layer.out_channels
+                weights_learned, bias_learned = layer.weight, layer.bias
+                weights_learned = nn.parameter.Parameter(torch.unsqueeze(weights_learned, dim=-1))
+                bias_learned = nn.parameter.Parameter(bias_learned)
                 layer = nn.Conv3d(in_channels=in_ch, out_channels=out_ch, kernel_size=(3,3,1), stride=(1,1,1), padding=(1,1,0))
+                layer.weight, layer.bias = weights_learned, bias_learned
                 self.features[i] = layer  
 
             elif isinstance(layer, nn.MaxPool2d):
@@ -32,8 +36,12 @@ class Fake3DNet(nn.Module):
         # Secition 2: Define model classifier
         self.classifier = nn.Sequential(
             nn.Linear(512*2*2*40, 2048),
-            nn.Linear(2048, 2),
-            nn.Softmax(dim=-1)
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.5, inplace=False),
+            nn.Linear(2048, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.5, inplace=False),
+            nn.Linear(512, 2)
         )
 
     # Section 3: Define forward function
@@ -47,7 +55,12 @@ class Fake3DNet(nn.Module):
 
 # Test
 if __name__ == "__main__":
-    model = Fake3DNet()
-    x = torch.rand([1, 3, 89, 89, 40])
-    y = model.forward(x)
-    print(y)
+    model = Fake3DNet().cuda()
+    with torch.no_grad():
+        for _ in range(10):
+            x = torch.randn([1, 3, 89, 89, 40]).cuda()
+            y = model(x)
+            print(y)
+
+    # for par in model.parameters():
+    #     print(par.dtype)
