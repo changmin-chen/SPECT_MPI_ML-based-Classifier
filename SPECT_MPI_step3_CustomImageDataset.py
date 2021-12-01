@@ -19,10 +19,16 @@ class CustomImageDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
+        label = self.img_labels.iloc[idx, 1] # 2nd column in csv = label (Normal=0, Abnormal=1)
+
         img_path = join(self.img_dir, self.img_labels.iloc[idx, 0]) # 1st column in csv = filename
         image = nib.load(img_path).get_fdata() # readout nii file as numpyArray using nib package
         image = torch.tensor(image).permute([3,0,1,2]) # permuted tensor would be [Channel x Height x Width x Depth]
-        label = self.img_labels.iloc[idx, 1] # 2nd column in csv = label (Normal=0, Abnormal=1)
+
+        # because inputs sholud have 3 channel, so...
+        image_cat = torch.unsqueeze(image[1] - image[0], dim=0)
+        image = torch.cat((image, image_cat), dim=0) 
+
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -39,8 +45,8 @@ if __name__ == '__main__':
     )
 
     # Dataset
-    train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', 'proc_data', 'TrainSet'), transform=img_transform)
-    test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', 'proc_data', 'TestSet'), transform=img_transform)
+    train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', 'proc_data_ver0', 'TrainSet'), transform=img_transform)
+    test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', 'proc_data_ver0', 'TestSet'), transform=img_transform)
 
     # Data loader (input pipeline)
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
@@ -48,7 +54,7 @@ if __name__ == '__main__':
 
     # Show up output tensor.Size
     for i, (images, labels) in enumerate(train_loader):
-        print(labels.dtype)
+        print(images.shape)
 
 
 # Using "CustomImageDataset" in SPECT_MPI_step3_dataLoader:
