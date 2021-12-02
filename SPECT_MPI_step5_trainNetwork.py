@@ -12,14 +12,15 @@ device = torch.device('cuda:0' if use_cuda else 'cpu')
 # print(f'Trainging using the device: {device}')
 
 # Step 1: Select image processing version, and commend the others
-ver = 'proc_data_ver0'
+# ver = 'proc_data_ver0'
 # ver = 'proc_data_ver1'
-# ver = 'proc_data_ver2'
+ver = 'proc_data_ver2'
+# ver = 'proc_data_ver3'
 
 # Step 2: Hyperparameters, Loss function, Optimizer
-args = {'num_epochs': 20,
+args = {'num_epochs': 40,
         'batch_size': 16,
-        'learning_rate': 0.001}
+        'learning_rate': 0.005}
 
 # Step 3: Define measurement function
 def classification_accuracy(test_loader, model):
@@ -40,9 +41,14 @@ def classification_accuracy(test_loader, model):
 # Step 3: Training
 if __name__ == '__main__':
 
-    # Dataloader
+    # Dataloader, utilize WeightedRandomSampler for unbalance data
     train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', ver, 'TrainSet'))
-    train_loader = DataLoader(dataset=train_dataset, batch_size=args['batch_size'], shuffle=True, num_workers=4, pin_memory=True)
+    weights = 1. /torch.tensor([35, 130], dtype=torch.float32)
+    train_target = torch.tensor(train_dataset.labels.iloc[:, 1], dtype=torch.long)
+    sample_weights = weights[train_target]
+    sampler = torch.utils.data.WeightedRandomSampler(sample_weights, num_samples=len(train_dataset), replacement=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=args['batch_size'], sampler=sampler, num_workers=4, pin_memory=True)
+
     test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
     test_loader = DataLoader(dataset=test_dataset, batch_size=args['batch_size'], shuffle=False, num_workers=1, pin_memory=True)
 
@@ -51,8 +57,9 @@ if __name__ == '__main__':
 
     # Loss function, Optimizer
     loss_func = nn.CrossEntropyLoss().to(device)
-    # loss_func = nn.CrossEntropyLoss(weight=torch.tensor([0.7, 0.3])).to(device)
+    # loss_func = nn.CrossEntropyLoss(weight=torch.tensor([0.8, 0.2])).to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr=args['learning_rate'])
+    # optimizer = torch.optim.Adam(model.parameters(), lr=args['learning_rate'])
 
     # Start training
     for epoch in range(args['num_epochs']):
@@ -87,4 +94,4 @@ if __name__ == '__main__':
     
     # Save the trained model
     model = model.cpu()
-    torch.save(model, 'Net_ver0' + '.pth')
+    torch.save(model, 'Net_ver2_SN' + '.pth')

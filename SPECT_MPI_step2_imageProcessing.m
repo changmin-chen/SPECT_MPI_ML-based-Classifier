@@ -15,7 +15,8 @@ for i = 1: length(info)
     % please select image procesing function here, and comment the others
 %     data = SPECT_MPI_imgProcFunc_ver0(img);
 %     data = SPECT_MPI_imgProcFunc_ver1(img);
-    data = SPECT_MPI_imgProcFunc_ver2(img);
+%     data = SPECT_MPI_imgProcFunc_ver2(img);
+    data = SPECT_MPI_imgProcFunc_ver3(img);
     
     % save as nifti
     niftiwrite(data, fullfile(targ, info(i).name));
@@ -36,7 +37,8 @@ for i = 1: length(info)
     % please select image procesing function here, and comment the others
 %     data = SPECT_MPI_imgProcFunc_ver0(img);
 %     data = SPECT_MPI_imgProcFunc_ver1(img);
-    data = SPECT_MPI_imgProcFunc_ver2(img);
+%     data = SPECT_MPI_imgProcFunc_ver2(img);
+    data = SPECT_MPI_imgProcFunc_ver3(img);
     
      % save as nifti
     niftiwrite(data, fullfile(targ, info(i).name));

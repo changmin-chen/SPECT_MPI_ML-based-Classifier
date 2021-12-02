@@ -35,12 +35,18 @@ if __name__ == '__main__':
     train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', 'proc_data_ver0', 'TrainSet'))
     test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', 'proc_data_ver0', 'TestSet'))
 
+    # WeightedRandomSampler for unbalance data
+    weights = 1. /torch.tensor([35, 130], dtype=torch.float32)
+    train_target = torch.tensor(train_dataset.labels.iloc[:, 1], dtype=torch.long)
+    sample_weights = weights[train_target]
+    sampler = torch.utils.data.WeightedRandomSampler(sample_weights, num_samples=len(train_dataset), replacement=True)
+
     # Data loader (input pipeline)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=16, sampler=sampler)
     test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
 
     # Show up output tensor.Size
-    for _, (images, labels) in enumerate(test_loader):
+    for _, (images, labels) in enumerate(train_loader):
         # print(images.shape)
         print(labels)
 
