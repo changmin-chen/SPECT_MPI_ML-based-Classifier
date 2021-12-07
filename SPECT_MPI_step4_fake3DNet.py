@@ -112,10 +112,10 @@ class Fake3DNet(nn.Module):
 
 # Test
 if __name__ == "__main__":
-    model = Fake3DNet().cuda()
+    model = Fake3DNet()
     with torch.no_grad():
         for _ in range(3):
-            x = torch.randn([2, 3, 89, 89, 40]).cuda()
+            x = torch.randn([2, 3, 89, 89, 40])
             y = model(x)
             print(y)
 

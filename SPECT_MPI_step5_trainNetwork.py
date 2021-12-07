@@ -9,16 +9,14 @@ import time
 # Training device, use gpu if available
 use_cuda = torch.cuda.is_available()
 device = torch.device('cuda:0' if use_cuda else 'cpu')
-# print(f'Trainging using the device: {device}')
 
 # Step 1: Select image processing version, and commend the others
 # ver = 'proc_data_ver0'
-# ver = 'proc_data_ver1'
-ver = 'proc_data_ver2'
-# ver = 'proc_data_ver3'
+ver = 'proc_data_ver1'
+# ver = 'proc_data_ver2'
 
 # Step 2: Hyperparameters, Loss function, Optimizer
-args = {'num_epochs': 40,
+args = {'num_epochs': 30,
         'batch_size': 16,
         'learning_rate': 0.005}
 
@@ -55,11 +53,11 @@ if __name__ == '__main__':
     # Get the predifined model
     model = Fake3DNet().to(device)
 
-    # Loss function, Optimizer
+    # Loss function
     loss_func = nn.CrossEntropyLoss().to(device)
-    # loss_func = nn.CrossEntropyLoss(weight=torch.tensor([0.8, 0.2])).to(device)
+
+    # Optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=args['learning_rate'])
-    # optimizer = torch.optim.Adam(model.parameters(), lr=args['learning_rate'])
 
     # Start training
     for epoch in range(args['num_epochs']):
@@ -94,4 +92,4 @@ if __name__ == '__main__':
     
     # Save the trained model
     model = model.cpu()
-    torch.save(model, 'Net_ver2_SN' + '.pth')
+    torch.save(model, 'Net_epoch30_bthsize16_lr5e-3' + '.pth')
