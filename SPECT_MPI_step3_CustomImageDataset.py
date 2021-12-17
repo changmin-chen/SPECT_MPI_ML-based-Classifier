@@ -11,9 +11,10 @@ import glob2 as gb
 # Creating a Custom Dataset for your files
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, dataroot):
+        # save all data in the RAM
         self.labels = pd.read_csv(annotations_file)
         images_path = gb.glob(join(dataroot, '*.nii'))
-        self.images = [nib.load(path).get_fdata() for path in images_path] # save all data in the RAM
+        self.images = [nib.load(path).get_fdata() for path in images_path] 
 
     def __len__(self):
         return len(self.labels)
@@ -28,7 +29,7 @@ class CustomImageDataset(Dataset):
      
 
 
-# Example: usage of CustomImageDataset
+# Test
 if __name__ == '__main__':
 
     # Dataset
@@ -36,7 +37,8 @@ if __name__ == '__main__':
     test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', 'proc_data_ver0', 'TestSet'))
 
     # WeightedRandomSampler for unbalance data
-    weights = 1. /torch.tensor([35, 130], dtype=torch.float32)
+    # define sampler using weights which are the reciprocal of the total number of each label category
+    weights = 1. /torch.tensor([sum(train_dataset.labels.iloc[:, 1]==0), sum(train_dataset.labels.iloc[:,1]==1)], dtype=torch.float32)
     train_target = torch.tensor(train_dataset.labels.iloc[:, 1], dtype=torch.long)
     sample_weights = weights[train_target]
     sampler = torch.utils.data.WeightedRandomSampler(sample_weights, num_samples=len(train_dataset), replacement=True)
@@ -49,8 +51,3 @@ if __name__ == '__main__':
     for _, (images, labels) in enumerate(train_loader):
         # print(images.shape)
         print(labels)
-
-
-# Using "CustomImageDataset" in SPECT_MPI_step3_dataLoader:
-#
-#   from SPECT_MPI_step3_dataLoader import CustomImageDataset
