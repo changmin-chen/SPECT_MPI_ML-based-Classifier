@@ -39,14 +39,15 @@ def classification_accuracy(test_loader, model):
 # Step 3: Training
 if __name__ == '__main__':
 
-    # Dataloader, utilize WeightedRandomSampler for unbalance data
+    # Train dataloader, utilize WeightedRandomSampler for unbalance data
     train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', ver, 'TrainSet'))
-    weights = 1. /torch.tensor([35, 130], dtype=torch.float32)
+    weights = 1. /torch.tensor([sum(train_dataset.labels.iloc[:, 1]==0), sum(train_dataset.labels.iloc[:,1]==1)], dtype=torch.float32)
     train_target = torch.tensor(train_dataset.labels.iloc[:, 1], dtype=torch.long)
     sample_weights = weights[train_target]
     sampler = torch.utils.data.WeightedRandomSampler(sample_weights, num_samples=len(train_dataset), replacement=True)
     train_loader = DataLoader(dataset=train_dataset, batch_size=args['batch_size'], sampler=sampler, num_workers=4, pin_memory=True)
 
+    # Test dataloader
     test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
     test_loader = DataLoader(dataset=test_dataset, batch_size=args['batch_size'], shuffle=False, num_workers=1, pin_memory=True)
 
@@ -92,4 +93,5 @@ if __name__ == '__main__':
     
     # Save the trained model
     model = model.cpu()
-    torch.save(model, 'Net_epoch30_bthsize16_lr5e-3' + '.pth')
+    model_name = 'Net_epoch{}_Batch{}_lr{}'.format(args['num_epochs'], args['batch_size'], args['learning_rate'])
+    torch.save(model, model_name+'.pth')
