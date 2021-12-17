@@ -4,6 +4,8 @@ import torchvision
 import torch
 import torch.nn as nn
 
+
+# SwitchNorm, copy from https://github.com/switchablenorms/Switchable-Normalization/blob/master/devkit/ops/switchable_norm.py
 class SwitchNorm1d(nn.Module):
     def __init__(self, num_features, eps=1e-5, momentum=0.997, using_moving_average=True):
         super(SwitchNorm1d, self).__init__()
@@ -97,6 +99,7 @@ class Fake3DNet_Conv3d(nn.Module):
         self.sn2 = SwitchNorm1d(512)
         self.linear3 = nn.Linear(512, 2)
 
+
     # Section 3: Define forward function
     def forward(self, x):
         x = self.features(x)
@@ -150,8 +153,6 @@ class Fake3DNet_Conv2d(nn.Module):
         return x
 
 
-
-
 # Test
 if __name__ == "__main__":
     
@@ -162,7 +163,6 @@ if __name__ == "__main__":
     print('testing Fake3DNet_Conv3d:\n')
     with torch.no_grad():
         for _ in range(1):
-            
             y = model(x)
             print(y)
 
@@ -171,7 +171,6 @@ if __name__ == "__main__":
     print('testing Fake3DNet_Conv2d:\n')
     with torch.no_grad():
         for _ in range(1):
-            
             y = model(x)
             print(y)  
     

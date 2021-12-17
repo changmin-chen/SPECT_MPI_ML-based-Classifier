@@ -3,22 +3,27 @@ import torch
 from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
 from torch.utils.data import DataLoader
 
-# Select image processing version dataset & corresponding network
 
-# Version 0: Not sure, most of the predicted result were abnormal (i.e. too sensitive)
+
+# Select image processing version dataset & corresponding network
+### Version 0: Not sure, most of the predicted result were abnormal (i.e. too sensitive) ###
 # ver = 'proc_data_ver0'
 # model_name = 'Net_epoch30_bthsize16_lr5e-3_ver0.pth'
 
-# Version 1: this model is likey more intelligently to classify normals & abnormals
-# ver = 'proc_data_ver1'
-# model_name = 'Net_epoch30_bthsize16_lr5e-3_ver1.pth'
+### Version 1: this model is likey more intelligently to classify normals & abnormals ###
+ver = 'proc_data_ver1'
+model_name = 'Net_epoch5_Batch16_lr0.001.pth'
 
-# Version 2: model all guess Abnormal
-ver = 'proc_data_ver2'
-model_name = 'Net_epoch30_bthsize16_lr5e-3_ver2.pth'
+### Version 2: model all guess Abnormal ###
+# ver = 'proc_data_ver2'
+# model_name = 'Net_epoch30_bthsize16_lr5e-3_ver2.pth'
+
+# Selecting device, use gpu if available
+use_cuda = torch.cuda.is_available()
+device = torch.device('cuda:0' if use_cuda else 'cpu')
 
 # Evaluate the network using test dataset
-model = torch.load(model_name).cuda()
+model = torch.load(model_name).to(device)
 test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
 test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
 
@@ -33,7 +38,7 @@ if __name__ == '__main__':
         FN = 0
 
         for i, (images, labels) in enumerate(test_loader):
-            images, labels = images.cuda(), labels.cuda()
+            images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
 
