@@ -1,5 +1,5 @@
-function data = SPECT_MPI_imgProcFunc_ver3(img)
-% SPECT_MPI_imgProcFunc_ver 3
+function data = SPECT_MPI_imgProcFunc_ver2(img)
+% SPECT_MPI_imgProcFunc_ver 2
 % only 3D registration
 
 addpath('./helperFunctions');

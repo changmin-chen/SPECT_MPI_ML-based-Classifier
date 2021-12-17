@@ -1,7 +1,7 @@
 from os.path import join
 from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
-from SPECT_MPI_step4_fake3DNet import Fake3DNet_Conv3d
-from SPECT_MPI_step4_fake3DNet import Fake3DNet_Conv2d
+from SPECT_MPI_step4_Fake3DNet import Fake3DNet_Conv3d
+from SPECT_MPI_step4_Fake3DNet import Fake3DNet_Conv2d
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn

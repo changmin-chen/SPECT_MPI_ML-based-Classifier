@@ -14,11 +14,10 @@ img = cc_img(imread(src)); % ccimg size = 712x890x3
 show(img, 'original image')
 
 %% step 1: 3D-registration
-
-% estimation
+% registration estimation
 [~, tforms] = regist_3d(to3d(rgb2gray(img)));
 
-% application (channel by channel)
+% apply registration (channel by channel)
 for ch = 1:3 % R, G and B
     
     % extract image channel by channel
