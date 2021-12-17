@@ -60,9 +60,9 @@ class SwitchNorm1d(nn.Module):
         return x * self.weight + self.bias
 
 
-class Fake3DNet(nn.Module):
+class Fake3DNet_Conv3d(nn.Module):
     def __init__(self):
-        super(Fake3DNet, self).__init__()
+        super(Fake3DNet_Conv3d, self).__init__()
 
         model_pretrained = torchvision.models.vgg16(pretrained=True)
 
@@ -96,7 +96,6 @@ class Fake3DNet(nn.Module):
         self.relu2 = nn.LeakyReLU()
         self.sn2 = SwitchNorm1d(512)
         self.linear3 = nn.Linear(512, 2)
-        self.sigmoid = nn.Sigmoid()
 
     # Section 3: Define forward function
     def forward(self, x):
@@ -104,7 +103,50 @@ class Fake3DNet(nn.Module):
         x = x.view(x.shape[0], -1) # concatenate all features from all planes
         x = self.sn1(self.relu1(self.linear1(x)))
         x = self.sn2(self.relu2(self.linear2(x)))
-        x = self.sigmoid(self.linear3(x))
+        x = self.linear3(x)
+        return x
+
+
+class Fake3DNet_Conv2d(nn.Module):
+    def __init__(self):
+        super(Fake3DNet_Conv2d, self).__init__()
+    
+        model_pretrained = torchvision.models.vgg16(pretrained=True)
+
+        # Section 1: Define model feature
+        self.features = model_pretrained.features
+
+        # We don't have that much data
+        for par in self.features.parameters():
+            par.requires_grad = False
+
+        # Secition 2: Define model classifier
+        self.linear1 = nn.Linear(512*2*2*40, 2048)
+        self.relu1 = nn.LeakyReLU()
+        self.sn1 = SwitchNorm1d(2048)
+        self.linear2 = nn.Linear(2048, 512)
+        self.relu2 = nn.LeakyReLU()
+        self.sn2 = SwitchNorm1d(512)
+        self.linear3 = nn.Linear(512, 2)
+
+    # Section 3: Define forward function
+    def forward(self, x):
+        (B, C, H, W, D) = x.shape
+
+        # temporarily change the input format from [B, C, H, W, D] into [B*D, C, H, W], then perfrom feature extration
+        # use torch.reshape instead of torch.view, because of the memory non-contiguousity
+        # after permute: torch.Tensor.is_contiguous(x) >> False, after reshape: torch.Tensor.is_contiguous(x) >> True
+        x = x.permute([0, 4, 1, 2, 3])
+        x = x.reshape(B*D, C, H, W) 
+        x = self.features(x)
+
+        # after feature extration, layout the (D,C,H,W)
+        x = x.view(B, -1)
+
+        # perfrom classification
+        x = self.sn1(self.relu1(self.linear1(x)))
+        x = self.sn2(self.relu2(self.linear2(x)))
+        x = self.linear3(x)
         return x
 
 
@@ -112,12 +154,24 @@ class Fake3DNet(nn.Module):
 
 # Test
 if __name__ == "__main__":
-    model = Fake3DNet()
+    
+    x = torch.randn([2, 3, 89, 89, 40])
+
+    # # For "Fake3DNet_Conv3d"
+    model = Fake3DNet_Conv3d()
+    print('testing Fake3DNet_Conv3d:\n')
     with torch.no_grad():
-        for _ in range(3):
-            x = torch.randn([2, 3, 89, 89, 40])
+        for _ in range(1):
+            
             y = model(x)
             print(y)
 
-    # for par in model.parameters():
-    #     print(par.dtype)
+    # For "Fake3DNet_Conv2d"
+    model = Fake3DNet_Conv2d()
+    print('testing Fake3DNet_Conv2d:\n')
+    with torch.no_grad():
+        for _ in range(1):
+            
+            y = model(x)
+            print(y)  
+    
