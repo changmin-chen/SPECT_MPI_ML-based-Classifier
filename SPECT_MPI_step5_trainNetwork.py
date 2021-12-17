@@ -1,6 +1,7 @@
 from os.path import join
 from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
-from SPECT_MPI_step4_fake3DNet import Fake3DNet
+from SPECT_MPI_step4_fake3DNet import Fake3DNet_Conv3d
+from SPECT_MPI_step4_fake3DNet import Fake3DNet_Conv2d
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
@@ -10,34 +11,24 @@ import time
 use_cuda = torch.cuda.is_available()
 device = torch.device('cuda:0' if use_cuda else 'cpu')
 
-# Step 1: Select image processing version, and commend the others
+# Step 1: Select the image processing version, and commend the others
+# after some trials, I think that model is likey more intelligently to classify normals/abnormals when using image processing ver1
 # ver = 'proc_data_ver0'
 ver = 'proc_data_ver1'
 # ver = 'proc_data_ver2'
 
-# Step 2: Hyperparameters, Loss function, Optimizer
-args = {'num_epochs': 30,
+# Step 2: Select the model, and commend the others
+# after some trials, I think that Conv2d version runs much faster than Conv3d version
+model = Fake3DNet_Conv2d().to(device)
+# model = Fake3DNet_Conv3d().to(device)
+
+# Step 3: Hyperparameters
+args = {'num_epochs': 5,
         'batch_size': 16,
-        'learning_rate': 0.005}
+        'learning_rate': 0.001}
 
-# Step 3: Define measurement function
-def classification_accuracy(test_loader, model):
-    with torch.no_grad():
-        correct = 0
-        total = 0
 
-        for images, labels in test_loader:
-            images = images.to(device)
-            labels = labels.to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum()
-        accuracy = correct.cpu().numpy() / total
-        return accuracy
-
-# Step 3: Training
-if __name__ == '__main__':
+def main(ver, model, args):
 
     # Train dataloader, utilize WeightedRandomSampler for unbalance data
     train_dataset = CustomImageDataset(join('..', 'trainSet.csv'), join('..', ver, 'TrainSet'))
@@ -45,14 +36,11 @@ if __name__ == '__main__':
     train_target = torch.tensor(train_dataset.labels.iloc[:, 1], dtype=torch.long)
     sample_weights = weights[train_target]
     sampler = torch.utils.data.WeightedRandomSampler(sample_weights, num_samples=len(train_dataset), replacement=True)
-    train_loader = DataLoader(dataset=train_dataset, batch_size=args['batch_size'], sampler=sampler, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=args['batch_size'], sampler=sampler, pin_memory=True)
 
     # Test dataloader
     test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
-    test_loader = DataLoader(dataset=test_dataset, batch_size=args['batch_size'], shuffle=False, num_workers=1, pin_memory=True)
-
-    # Get the predifined model
-    model = Fake3DNet().to(device)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=args['batch_size'], shuffle=False, pin_memory=True)
 
     # Loss function
     loss_func = nn.CrossEntropyLoss().to(device)
@@ -60,6 +48,22 @@ if __name__ == '__main__':
     # Optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=args['learning_rate'])
 
+    # Define model performance measurement
+    def classification_accuracy(test_loader, model):
+        with torch.no_grad():
+            correct = 0
+            total = 0
+
+            for images, labels in test_loader:
+                images = images.to(device)
+                labels = labels.to(device)
+                outputs = model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum()
+            accuracy = correct.cpu().numpy() / total
+            return accuracy
+    
     # Start training
     for epoch in range(args['num_epochs']):
 
@@ -84,7 +88,7 @@ if __name__ == '__main__':
                 loss = loss_func(outputs, labels)
                 test_loss.append(loss.item())
 
-        # calculate the accuracy
+        # Evaluate model performance
         acccuracy_test = classification_accuracy(test_loader, model)
         print('Epoch {}, Time {:.2f}, Train Loss: {:.4f}, Test Loss: {:.4f}, Test Accuracy: {:.4f}'
               .format(epoch + 1, time.time() - tini,
@@ -95,3 +99,7 @@ if __name__ == '__main__':
     model = model.cpu()
     model_name = 'Net_epoch{}_Batch{}_lr{}'.format(args['num_epochs'], args['batch_size'], args['learning_rate'])
     torch.save(model, model_name+'.pth')
+
+
+if __name__=='__main__':
+    main(ver=ver, model=model, args=args)
