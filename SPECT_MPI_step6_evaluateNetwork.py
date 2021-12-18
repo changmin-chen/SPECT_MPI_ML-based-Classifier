@@ -1,31 +1,38 @@
 from os.path import join
 import torch
 from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
+from SPECT_MPI_step3_CustomImageDataset import dataset_statistics
 from torch.utils.data import DataLoader
-
-
-
-# Select image processing version dataset & corresponding network
-### Version 0: Not sure, most of the predicted result were abnormal (i.e. too sensitive) ###
-# ver = 'proc_data_ver0'
-# model_name = 'Net_epoch30_bthsize16_lr5e-3_ver0.pth'
-
-### Version 1: this model is likey more intelligently to classify normals & abnormals ###
-ver = 'proc_data_ver1'
-model_name = 'Net_epoch5_Batch16_lr0.001.pth'
-
-### Version 2: model all guess Abnormal ###
-# ver = 'proc_data_ver2'
-# model_name = 'Net_epoch30_bthsize16_lr5e-3_ver2.pth'
 
 # Selecting device, use gpu if available
 use_cuda = torch.cuda.is_available()
 device = torch.device('cuda:0' if use_cuda else 'cpu')
 
+# Select image processing version dataset & corresponding network
+ver = 'proc_data_ver1'
+model_name = 'Net_epoch5_Batch16_lr0.001.pth'
+
+# Define transform
+# if you had standardize data during training set, specify tranform = standardization,
+# if not, specify transform = None
+test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
+mean, std = dataset_statistics(test_dataset)
+def standardization(image, mean=mean, std=std):
+    # image fromat = [C, H, W, D]
+    # image[channel] = (image[channel] - mean[channel]) ./ std[channel]
+    image = (image - mean[:, None, None, None])*(1./std[:, None, None, None])
+
+    return image
+
+transform = standardization
+# transform = None
+
+
 # Evaluate the network using test dataset
 model = torch.load(model_name).to(device)
-test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
+test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'), transform=transform)
 test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
+
 
 
 if __name__ == '__main__': 
