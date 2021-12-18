@@ -91,13 +91,13 @@ class Fake3DNet_Conv3d(nn.Module):
             par.requires_grad = False
 
         # Secition 2: Define model classifier
-        self.linear1 = nn.Linear(512*2*2*40, 2048)
+        self.linear1 = nn.Linear(512*2*2*40, 64)
         self.relu1 = nn.LeakyReLU()
-        self.sn1 = SwitchNorm1d(2048)
-        self.linear2 = nn.Linear(2048, 512)
+        self.sn1 = SwitchNorm1d(64)
+        self.linear2 = nn.Linear(64, 64)
         self.relu2 = nn.LeakyReLU()
-        self.sn2 = SwitchNorm1d(512)
-        self.linear3 = nn.Linear(512, 2)
+        self.sn2 = SwitchNorm1d(64)
+        self.linear3 = nn.Linear(64, 2)
 
 
     # Section 3: Define forward function
@@ -124,13 +124,13 @@ class Fake3DNet_Conv2d(nn.Module):
             par.requires_grad = False
 
         # Secition 2: Define model classifier
-        self.linear1 = nn.Linear(512*2*2*40, 2048)
+        self.linear1 = nn.Linear(512*2*2*40, 64)
         self.relu1 = nn.LeakyReLU()
-        self.sn1 = SwitchNorm1d(2048)
-        self.linear2 = nn.Linear(2048, 512)
+        self.sn1 = SwitchNorm1d(64)
+        self.linear2 = nn.Linear(64, 64)
         self.relu2 = nn.LeakyReLU()
-        self.sn2 = SwitchNorm1d(512)
-        self.linear3 = nn.Linear(512, 2)
+        self.sn2 = SwitchNorm1d(64)
+        self.linear3 = nn.Linear(64, 2)
 
     # Section 3: Define forward function
     def forward(self, x):
