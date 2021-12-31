@@ -1,5 +1,5 @@
 function D = to3d(ccimg)
-% helper func3: ccimg to 3D
+% helper func: ccimg to 3D
 % cc_img block size = 89x89, total size = 712x890
 
 if any(size(ccimg,1:3)~=[712,890,1])

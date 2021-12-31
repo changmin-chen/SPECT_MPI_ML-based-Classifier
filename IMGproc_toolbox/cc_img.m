@@ -1,9 +1,15 @@
 function C = cc_img(img)
-% helper func2: crop and concatenate image
-% crop and concatenate binary image
-% output 2d cropped and concatenated image
-% original block size = 90x90
-% output block size = 89x89
+% ***this function should be applied at first step*** 
+% no matter which version of the image-processing protocol is performed.
+% ----
+% objective: 
+% remove redudant things on the original image,
+% then crop and concatenate into new 2d image
+% original block element size = 90x90
+% output block element size = 89x89 (discard the white block lines)
+% ---
+% input image size: 897x976x3
+% output image size: 712x890x3
 
 % SA view
 SA_lu = [51, 70];
@@ -26,7 +32,7 @@ HLA = img(HLAr,HLAc,:);
 VLA = img(VLAr,VLAc,:);
 C = cat(1, SA, HLA, VLA);
 
-% remove number
+% remove number label on each block
 proc_area = [14, 17];
 for j = 1:10
     for i = 1:8

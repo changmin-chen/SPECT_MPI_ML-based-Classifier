@@ -1,6 +1,9 @@
 function ccimg = toccimg(D)
-% helper func 4: 3D to ccimg
+% helper func : 3D to ccimg
 % 3D volume  size = 89x89x80, (stress:1:40, rest:41:80)
+% concatenate and order each slices, and thus recover to the original 2d
+% representation of the SPECT MPI image
+
 if any(size(D,1:3)~=[89,89,80])
     error('Image should be 3D with size 89x89x80.')
 end
