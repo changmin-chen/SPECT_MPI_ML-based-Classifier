@@ -20,4 +20,14 @@ The stress volume is registrated to the rest volume(3 dimensional, rigid-body).
 ## Pipeline
 根據檔案名稱中的step次序執行檔案  
 已經過影像處理完畢的檔案存放於: https://drive.google.com/drive/folders/1EdcS08BG3pkm9ZGedpNDHEJ9-gkUouEI?usp=sharing  
-(若已下載影像處理完畢的檔案，則直接從step2開始執行檔案即可)
+建議直接下載影像處理完畢的檔案，直接從step1開始執行程式即可
+(若欲觀看影像處理過程，亦或想從原始影像處理開始執行各步驟，請見"IMGproc_toolbox"資料夾)
+
+## IMGproc_toolbox
+* SPECT_MPI_step0_imageProcessing:  
+執行影像處理  
+以原始影像作為輸入(預定存放於"data"資料夾)，並輸出影像處理後的影像，存放到"proc_data"資料夾。
+
+* Example_imageProcessing_ver1_3Dregist_circleMasked:  
+範例程式  
+呈現影像處理過程中各個階段的結果(該程式碼以影像處理ver 1為例)。
