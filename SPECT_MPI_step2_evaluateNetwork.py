@@ -1,41 +1,33 @@
 from os.path import join
 import torch
-from SPECT_MPI_step3_CustomImageDataset import CustomImageDataset
-from SPECT_MPI_step3_CustomImageDataset import dataset_statistics
+import utils.MPIdataset as mpidataset
 from torch.utils.data import DataLoader
+from SPECT_MPI_step1_trainNetwork import dataset_statistics
 
-# Selecting device, use gpu if available
-use_cuda = torch.cuda.is_available()
-device = torch.device('cuda:0' if use_cuda else 'cpu')
 
-# Select image processing version dataset & corresponding network
+# Select image processing version dataset & corresponding trained network
 ver = 'proc_data_ver1'
 model_name = 'Net_epoch5_Batch16_lr0.001.pth'
 
-# Define transform
-# if you had standardize data during training set, specify tranform = standardization,
-# if not, specify transform = None
-test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'))
-mean, std = dataset_statistics(test_dataset)
-def standardization(image, mean=mean, std=std):
-    # image fromat = [C, H, W, D]
-    # image[channel] = (image[channel] - mean[channel]) ./ std[channel]
-    image = (image - mean[:, None, None, None])*(1./std[:, None, None, None])
 
-    return image
+def main(ver, model_name):
 
-transform = standardization
-# transform = None
+    # Selecting device, use gpu if available
+    use_cuda = torch.cuda.is_available()
+    device = torch.device('cuda:0' if use_cuda else 'cpu')
 
+    # Define standardization, mean & std calculation is based on TrainSet
+    test_dataset = mpidataset.MPIdataset('testSet.csv', join('..', ver, 'TestSet'))
+    mean, std = dataset_statistics(ver)
+    def standardization(image, mean=mean, std=std):
+        return (image - mean[:, None, None, None])*(1./std[:, None, None, None])
 
-# Evaluate the network using test dataset
-model = torch.load(model_name).to(device)
-test_dataset = CustomImageDataset(join('..', 'testSet.csv'), join('..', ver, 'TestSet'), transform=transform)
-test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
+    # Evaluate the network using test dataset
+    model = torch.load(model_name).to(device)
+    test_dataset = mpidataset.MPIdataset('testSet.csv', join('..', ver, 'TestSet'), transform=standardization)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
 
 
-
-if __name__ == '__main__': 
     with torch.no_grad():
         total = 0
         correct = 0
@@ -66,4 +58,7 @@ if __name__ == '__main__':
         sensitivity = TP / (TP+FN)
         specificity = TN / (FP+TN)
         print(f'Total Samples Number:{total}, Accuracy:{accuracy:.4f}, Sensitivity:{sensitivity:.4f}, Specificity:{specificity:.4f}')
-        
+
+
+if __name__ == '__main__':
+    main(ver=ver, model_name=model_name)

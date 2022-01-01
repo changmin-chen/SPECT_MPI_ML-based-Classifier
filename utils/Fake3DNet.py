@@ -5,7 +5,8 @@ import torch
 import torch.nn as nn
 
 
-# SwitchNorm, copy from https://github.com/switchablenorms/Switchable-Normalization/blob/master/devkit/ops/switchable_norm.py
+# SwitchNorm
+# code copied from https://github.com/switchablenorms/Switchable-Normalization/blob/master/devkit/ops/switchable_norm.py
 class SwitchNorm1d(nn.Module):
     def __init__(self, num_features, eps=1e-5, momentum=0.997, using_moving_average=True):
         super(SwitchNorm1d, self).__init__()
@@ -172,5 +173,4 @@ if __name__ == "__main__":
     with torch.no_grad():
         for _ in range(1):
             y = model(x)
-            print(y)  
-    
+            print(y)     
