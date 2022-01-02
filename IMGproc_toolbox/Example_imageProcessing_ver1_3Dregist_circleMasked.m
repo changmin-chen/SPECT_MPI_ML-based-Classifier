@@ -47,9 +47,9 @@ end
 hold(h1, 'off')
 
 % get mask and show masking performance
-mask = get_mask(img);
+[~, mask] = mask_infwall(img);
 show(mask, 'original mask')
-mask_mr = get_mask(img, 'mirror');
+[~, mask_mr] = mask_infwall(img, 'mirror');
 show(mask_mr, 'mirrored mask')
 
 % show masked-registered image

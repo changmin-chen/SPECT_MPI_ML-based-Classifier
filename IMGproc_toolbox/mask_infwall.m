@@ -23,12 +23,13 @@ if nargin > 1
     
 end
 
-%% Get centroid and estimated left ventricle walls
-[centroids, lvc, ~] = get_centroids(img);
+%% Get centroids
+[centroids, ~, ~] = get_centroids(img);
 stress_centroids = centroids(1:40, :);
 rest_centroids = centroids(41:80, :);
 
 %% Computing mask based on centroids
+lvc = img(:,:,1)>165;
 mask = true(size(lvc));
 overlap_threshold = 0.75; % overlapping b/w area and circle-mask > 0.75
 yaxis_threshold = 89/2; % distance to upper edge > distance to lower edge
