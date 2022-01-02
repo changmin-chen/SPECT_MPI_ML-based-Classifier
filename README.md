@@ -6,22 +6,26 @@ __資料來源、影像處理方法之參考與其他本計畫相關資訊皆取
 最終儲存的檔案型式為nii檔，矩陣大小89x89x40x2(第四維度的第1個是stress、第2個是rest)。  
 
 除上述之外，ver0至ver2具有差異的部分如下:  
-__ver 0:__  
+__verion 0__  
 do nothing further.  
 
-__ver 1:__  
+__verion 1__  
 (1) The stress volume is registrated to the rest volume(3 dimensional, rigid-body).  
 (2) And then, mask the excessive inferior wall signal by using the half-circle mask (block-wise), whos center is the centroid of the heart wall.  
 
-__ver 2:__   
+__verion 2__   
 The stress volume is registrated to the rest volume(3 dimensional, rigid-body).  
+
+  
+![image](https://github.com/chenchami/SPECT_MPI/blob/master/SPECT_MPI_flowchart.png)
 
 ## Pipeline
 根據檔案名稱中的step次序執行檔案    
-建議直接下載[影像處理完畢的檔案](https://drive.google.com/drive/folders/1EdcS08BG3pkm9ZGedpNDHEJ9-gkUouEI?usp=sharing)並直接從step1開始執行程式即可   
+建議直接下載[影像處理完畢的檔案](https://drive.google.com/drive/folders/1EdcS08BG3pkm9ZGedpNDHEJ9-gkUouEI?usp=sharing)後直接從step1開始執行程式即可   
 (若欲觀看影像處理過程，亦或想從原始影像處理開始執行各步驟，請見"IMGproc_toolbox"資料夾)  
 
 ## IMGproc_toolbox
+程式碼說明:  
 * SPECT_MPI_step0_imageProcessing:  
 執行影像處理  
 以原始影像作為輸入(預定存放於"data"資料夾)，並輸出影像處理後的影像，存放到"proc_data"資料夾。
