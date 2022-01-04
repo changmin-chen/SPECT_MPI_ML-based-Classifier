@@ -22,7 +22,7 @@ switch version
     case 'ver1'
         fprintf('Perform image processing verion 1:\n')
         img = regist3d_estimate_and_reslice(img);
-        img = mask_infwall(img);
+        img = mask_infwall(img, 'mirror');
     case 'ver2'
         fprintf('Perform image processing verion 2:\n')
         img = regist3d_estimate_and_reslice(img);
