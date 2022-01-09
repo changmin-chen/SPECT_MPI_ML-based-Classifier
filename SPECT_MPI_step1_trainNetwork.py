@@ -17,9 +17,9 @@ ver = 'proc_data_ver1'
 model = net.Fake3DNet_Conv2d()
 
 # (3) hyperparameters
-args = {'num_epochs': 5,
+args = {'num_epochs': 10,
         'batch_size': 16,
-        'learning_rate': 0.001}
+        'learning_rate': 0.0005}
 
 # (4) loss function
 loss_func = nn.CrossEntropyLoss()
@@ -79,16 +79,16 @@ def dataset_statistics(ver):
 
     return mean, std
 
-# Get mean and standard deviation for standardizing the images
-mean, std = dataset_statistics(ver)
-def standardization(image, mean=mean, std=std):
-    return (image - mean[:, None, None, None])*(1./std[:, None, None, None])
-
 
 def train(ver, model, loss_func, optimizer, args):
  
     # Preprocess the sample labels
     labels_preproc()
+
+    # Get mean and standard deviation for standardizing the images
+    mean, std = dataset_statistics(ver)
+    def standardization(image, mean=mean, std=std):
+        return (image - mean[:, None, None, None])*(1./std[:, None, None, None])
 
     # TrainSet dataloader, utilize WeightedRandomSampler for unbalance data
     train_dataset = mpidataset.MPIdataset('trainSet.csv', join('..', ver, 'TrainSet'), transform=standardization)
