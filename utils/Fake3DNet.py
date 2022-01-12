@@ -63,54 +63,6 @@ class SwitchNorm1d(nn.Module):
         return x * self.weight + self.bias
 
 
-class Fake3DNet_Conv3d(nn.Module):
-    def __init__(self):
-        super(Fake3DNet_Conv3d, self).__init__()
-
-        model_pretrained = torchvision.models.vgg16(pretrained=True)
-
-        # Section 1: Define model feature
-        # Create a fake 3D-Net (because the operations are actually is 2D),
-        # which using the pretrained parameters in VGG16
-        self.features = model_pretrained.features
-        for i, layer in enumerate(self.features.children()):
-            if isinstance(layer, nn.Conv2d):
-                in_ch, out_ch = layer.in_channels, layer.out_channels
-                weights_learned, bias_learned = layer.weight, layer.bias
-                weights_learned = nn.parameter.Parameter(torch.unsqueeze(weights_learned, dim=-1))
-                bias_learned = nn.parameter.Parameter(bias_learned)
-                layer = nn.Conv3d(in_channels=in_ch, out_channels=out_ch, kernel_size=(3,3,1), stride=(1,1,1), padding=(1,1,0))
-                layer.weight, layer.bias = weights_learned, bias_learned
-                self.features[i] = layer  
-
-            elif isinstance(layer, nn.MaxPool2d):
-                layer = nn.MaxPool3d(kernel_size=(2,2,1), stride=(2,2,1), padding=0, dilation=1, ceil_mode=False)
-                self.features[i] = layer
-
-        # We don't have that much data
-        for par in self.features.parameters():
-            par.requires_grad = False
-
-        # Secition 2: Define model classifier
-        self.linear1 = nn.Linear(512*2*2*40, 64)
-        self.relu1 = nn.LeakyReLU()
-        self.sn1 = SwitchNorm1d(64)
-        self.linear2 = nn.Linear(64, 64)
-        self.relu2 = nn.LeakyReLU()
-        self.sn2 = SwitchNorm1d(64)
-        self.linear3 = nn.Linear(64, 2)
-
-
-    # Section 3: Define forward function
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.shape[0], -1) # concatenate all features from all planes
-        x = self.sn1(self.relu1(self.linear1(x)))
-        x = self.sn2(self.relu2(self.linear2(x)))
-        x = self.linear3(x)
-        return x
-
-
 class Fake3DNet_Conv2d(nn.Module):
     def __init__(self):
         super(Fake3DNet_Conv2d, self).__init__()
@@ -118,20 +70,19 @@ class Fake3DNet_Conv2d(nn.Module):
         model_pretrained = torchvision.models.vgg16(pretrained=True)
 
         # Section 1: Define model feature
-        self.features = model_pretrained.features
+        self.features = model_pretrained.features[:10]
 
         # We don't have that much data
         for par in self.features.parameters():
             par.requires_grad = False
 
         # Secition 2: Define model classifier
-        self.linear1 = nn.Linear(512*2*2*40, 64)
-        self.relu1 = nn.LeakyReLU()
-        self.sn1 = SwitchNorm1d(64)
-        self.linear2 = nn.Linear(64, 64)
-        self.relu2 = nn.LeakyReLU()
-        self.sn2 = SwitchNorm1d(64)
-        self.linear3 = nn.Linear(64, 2)
+        self.classifier = nn.Sequential(
+        nn.Linear(128*22*22*40, 64),
+        nn.ReLU(),
+        SwitchNorm1d(64),
+        nn.Linear(64, 2)
+        )
 
     # Section 3: Define forward function
     def forward(self, x):
@@ -148,9 +99,7 @@ class Fake3DNet_Conv2d(nn.Module):
         x = x.view(B, -1)
 
         # perfrom classification
-        x = self.sn1(self.relu1(self.linear1(x)))
-        x = self.sn2(self.relu2(self.linear2(x)))
-        x = self.linear3(x)
+        x = self.classifier(x)
         return x
 
 
@@ -158,14 +107,6 @@ class Fake3DNet_Conv2d(nn.Module):
 if __name__ == "__main__":
     
     x = torch.randn([2, 3, 89, 89, 40])
-
-    # # For "Fake3DNet_Conv3d"
-    model = Fake3DNet_Conv3d()
-    print('testing Fake3DNet_Conv3d:\n')
-    with torch.no_grad():
-        for _ in range(1):
-            y = model(x)
-            print(y)
 
     # For "Fake3DNet_Conv2d"
     model = Fake3DNet_Conv2d()
