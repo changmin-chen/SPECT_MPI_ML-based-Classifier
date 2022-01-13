@@ -1,5 +1,3 @@
-
-from torch.nn.modules.linear import Linear
 import torchvision
 import torch
 import torch.nn as nn

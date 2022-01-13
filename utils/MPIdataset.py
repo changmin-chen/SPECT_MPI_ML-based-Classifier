@@ -2,9 +2,7 @@ from os.path import join
 import pandas as pd
 import nibabel as nib
 import torch
-import torch.nn as nn
 from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 import glob2 as gb
 
 
@@ -22,7 +20,6 @@ class MPIdataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        # 2nd column in csv contains labels (Normal=0, Abnormal=1)
         label = torch.tensor(self.labels.iloc[idx, 1])
         image = torch.tensor(self.images[idx], dtype=torch.float32).permute([3,0,1,2])
         image_cat = torch.unsqueeze(image[1] - image[0], dim=0) 
