@@ -3,13 +3,12 @@ import torch
 import utils.MPIdataset as mpidataset
 from torch.utils.data import DataLoader
 from sklearn.metrics import roc_curve, auc
-import numpy as np
 import matplotlib.pyplot as plt
 from SPECT_MPI_step1_trainNetwork import dataset_statistics
 
 
 # Select image processing version dataset & corresponding trained network
-ver = 'proc_data_ver0'
+ver = 'proc_data_ver1'
 model_name = 'Net_epoch20_Batch16_lr0.001.pth'
 
 def draw_roc_curve(y_true, y_score):
@@ -22,7 +21,7 @@ def draw_roc_curve(y_true, y_score):
         tpr,
         color='darkorange',
         lw=2,
-        label="ROC curve (area = %0.2f)" % roc_auc,
+        label="ROC curve (area = %0.4f)" % roc_auc,
     )
 
     plt.plot([0,1],[0,1],color='navy',lw=2,linestyle='--')

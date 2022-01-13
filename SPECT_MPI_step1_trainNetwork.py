@@ -4,7 +4,6 @@ import time
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
-import torchvision.transforms as T
 import utils.MPIdataset as mpidataset
 import utils.Fake3DNet as net
 
@@ -17,9 +16,9 @@ ver = 'proc_data_ver1'
 model = net.Fake3DNet_Conv2d()
 
 # (3) hyperparameters
-args = {'num_epochs': 10,
+args = {'num_epochs': 20,
         'batch_size': 16,
-        'learning_rate': 0.0005}
+        'learning_rate': 0.001}
 
 # (4) loss function
 loss_func = nn.CrossEntropyLoss()
