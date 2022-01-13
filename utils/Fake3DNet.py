@@ -61,6 +61,7 @@ class SwitchNorm1d(nn.Module):
         return x * self.weight + self.bias
 
 
+# Extract shallower features.
 class Fake3DNet_Conv2d(nn.Module):
     def __init__(self):
         super(Fake3DNet_Conv2d, self).__init__()
@@ -80,6 +81,50 @@ class Fake3DNet_Conv2d(nn.Module):
         nn.ReLU(),
         SwitchNorm1d(64),
         nn.Linear(64, 2)
+        )
+
+    # Section 3: Define forward function
+    def forward(self, x):
+        (B, C, H, W, D) = x.shape
+
+        # temporarily change the input format from [B, C, H, W, D] into [B*D, C, H, W], then perfrom feature extration
+        # use torch.reshape instead of torch.view, because of the memory non-contiguousity
+        # after permute: torch.Tensor.is_contiguous(x) >> False, after reshape: torch.Tensor.is_contiguous(x) >> True
+        x = x.permute([0, 4, 1, 2, 3])
+        x = x.reshape(B*D, C, H, W) 
+        x = self.features(x)
+
+        # after feature extration, layout the (D,C,H,W)
+        x = x.view(B, -1)
+
+        # perfrom classification
+        x = self.classifier(x)
+        return x
+
+
+# Extract deeper features. Not recommended, may be overfitting
+class Fake3DNet_Conv2d_Deep(nn.Module):
+    def __init__(self):
+        super(Fake3DNet_Conv2d_Deep, self).__init__()
+    
+        model_pretrained = torchvision.models.vgg16(pretrained=True)
+
+        # Section 1: Define model feature
+        self.features = model_pretrained.features
+
+        # We don't have that much data
+        for par in self.features.parameters():
+            par.requires_grad = False
+
+        # Secition 2: Define model classifier
+        self.classifier = nn.Sequential(
+        nn.Linear(512*2*2*40, 64),
+        nn.LeakyReLU(),
+        SwitchNorm1d(64),
+        nn.Linear(64, 64),
+        nn.LeakyReLU(),
+        SwitchNorm1d(64),
+        nn.Linear(64, 2),
         )
 
     # Section 3: Define forward function
