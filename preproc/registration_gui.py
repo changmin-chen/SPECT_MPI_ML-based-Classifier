@@ -29,7 +29,7 @@ def plot_values(registration_method):
     global metric_values, multires_iterations, ax, fig
     metric_values.append(registration_method.GetMetricValue())
     print('Current learning rate:', registration_method.GetOptimizerLearningRate(), 'Metric value:', metric_values[-1])
-    print('Scales:', registration_method.GetOptimizerScales())
+    # print('Scales:', registration_method.GetOptimizerScales())
 
     # Plot the similarity metric values
     ax.plot(metric_values, 'r')
