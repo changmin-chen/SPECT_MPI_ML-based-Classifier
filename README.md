@@ -2,8 +2,7 @@
 Data source and references for image processing methods: [Kaggle | SPECT MPI](https://www.kaggle.com/selcankaplan/spect-mpi)    
 
 ### Objective of this Project  
-This project explored three different image processing pipelines, to test that image processing would or wouldn't help for training the machine learning model, which was a convolutional neural network (CNN) based classifier for distinguishing normal/abnormal myocardial perfusion status using solely the SPECT MPI images as its input data.
-
+This project explored three different image processing pipelines, to test that image processing would or wouldn't help for training the machine learning model, which was a convolutional neural network (CNN) based classifier for distinguishing normal/abnormal myocardial perfusion status using solely the SPECT MPI images as its input data. See [project report](https://www.dropbox.com/sh/f4e2483jltonz50/AADH1j0qqFxssg61EEqkNcWEa?dl=0) for further information.
 
 __Major differences between image processing pipline versions:__   
 * __verion 0__  
