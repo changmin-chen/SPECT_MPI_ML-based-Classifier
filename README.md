@@ -1,37 +1,25 @@
-# Acknowledgement
-__資料來源、影像處理方法之參考與其他本計畫相關資訊皆取自於[Kaggle | SPECT MPI](https://www.kaggle.com/selcankaplan/spect-mpi)__    
-## Image Processing Information for each Versions  
-每個影像處理版本都會移除影像中不必要的框線或數字。  
-接著將每個block elements(心臟各個不同切面)，在第三維度做串接以形成3D volume(stress與rest狀態分開處理)。  
-最終儲存的檔案型式為nii檔，矩陣大小89x89x40x2(第四維度的第1個是stress、第2個是rest)。  
+### Acknowledgement
+Data source and references for image processing methods: [Kaggle | SPECT MPI](https://www.kaggle.com/selcankaplan/spect-mpi)    
 
-除上述之外，ver0至ver2具有差異的部分如下:  
-__verion 0__  
-do nothing further.  
+### Objective of this Project  
+This project explored three different image processing pipelines, to test that image processing would or wouldn't help for training the machine learning model, which was a convolutional neural network (CNN) based classifier for distinguishing normal/abnormal myocardial perfusion status using solely the SPECT MPI images as its input data.
 
-__verion 1__  
-(1) The stress volume is registrated to the rest volume(3 dimensional, rigid-body).  
-(2) And then, mask the excessive inferior wall signal by using the half-circle mask (block-wise), whos center is the centroid of the heart wall.  
 
-__verion 2__   
-The stress volume is registrated to the rest volume(3 dimensional, rigid-body).  
+__Major differences between image processing pipline versions:__   
+* __verion 0__  
+Remove redundant frame lines, number labels, etc., from the original 2D images, then cropped and concatenated it to become a 3D heart volume. The input data for CNN model will have 2 channels: stress and rest (status of the heart during imaging).   
 
-  
-![image](https://github.com/chenchami/SPECT_MPI/blob/master/info/SPECT_MPI_flowchart.png)
-## Model Architecture  
+* __verion 1__  
+Further than version 0, also:  
+(1) The stress volume was spatially __registrated__ to the rest volume (3 dimensional, rigid-body).  
+(2) The excessive signals located at inferior heart wall were __masked__ by the half-circle-mask, whos center was the centroid of the heart wall.  
+ 
+
+* __verion 2__   
+Further than version 0, also:  
+(1) The stress volume was spatially __registrated__ to the rest volume (3 dimensional, rigid-body).  
+
+![image](https://github.com/chenchami/SPECT_MPI/blob/master/info/SPECT_MPI_flowchart.png)  
+
+### Model Architecture  
 ![image](https://github.com/chenchami/SPECT_MPI/blob/master/info/Fake3dNet_structure.png)
-
-## Pipeline
-根據檔案名稱中的step次序執行檔案    
-建議直接下載[影像處理完畢的檔案](https://drive.google.com/drive/folders/1EdcS08BG3pkm9ZGedpNDHEJ9-gkUouEI?usp=sharing)後直接從step1開始執行程式即可   
-(若欲觀看影像處理過程，亦或想從原始影像處理開始執行各步驟，請見"IMGproc_toolbox"資料夾)  
-
-## IMGproc_toolbox
-程式碼說明:  
-* SPECT_MPI_step0_imageProcessing:  
-執行影像處理  
-以原始影像作為輸入(預定存放於"data"資料夾)，並輸出影像處理後的影像，存放到"proc_data"資料夾。
-
-* Example_imageProcessing_ver1_3Dregist_circleMasked:  
-範例程式  
-呈現影像處理過程中各個階段的結果(該程式碼以影像處理ver 1為例)。
