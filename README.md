@@ -10,15 +10,14 @@ Remove redundant frame lines, number labels, etc., from the original 2D images, 
 
 * __verion 1__  
 Further than version 0, also:  
-(1) The stress volume was spatially __registrated__ to the rest volume (3 dimensional, rigid-body).  
+(1) The stress volume was spatially __registered__ to the rest volume (3 dimensional, rigid-body).  
 (2) The excessive signals located at inferior heart wall were __masked__ by the half-circle-mask, whos center was the centroid of the heart wall.  
  
 
 * __verion 2__   
 Further than version 0, also:  
-(1) The stress volume was spatially __registrated__ to the rest volume (3 dimensional, rigid-body).  
-
-![image](https://github.com/chenchami/SPECT_MPI/blob/master/info/SPECT_MPI_flowchart.png)  
+(1) The stress volume was spatially __registered__ to the rest volume (3 dimensional, rigid-body).  
+<img src="https://github.com/chenchami/SPECT_MPI/blob/master/info/SPECT_MPI_flowchart.png" width="1200"/>
 
 ### Model Architecture  
-![image](https://github.com/chenchami/SPECT_MPI/blob/master/info/Fake3dNet_structure.png)
+<img src="https://github.com/chenchami/SPECT_MPI/blob/master/info/Fake3dNet_structure.png" width="800"/>
